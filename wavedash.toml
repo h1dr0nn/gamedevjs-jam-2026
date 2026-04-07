@@ -1,0 +1,7 @@
+# Wavedash deployment config
+# Docs: https://docs.wavedash.com
+
+[game]
+# TODO: Set your game_id after creating the game on https://wavedash.com/developers
+game_id = "YOUR_GAME_ID_HERE"
+upload_dir = "dist"
