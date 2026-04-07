@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/Player';
+import { Enemy } from '../entities/enemies/Enemy';
 import { Grunt } from '../entities/enemies/Grunt';
 import { Barrel } from '../entities/environment/Barrel';
 import { Boulder } from '../entities/environment/Boulder';
@@ -7,6 +8,7 @@ import { CrackedWall } from '../entities/environment/CrackedWall';
 import { ComboSystem } from '../systems/ComboSystem';
 import { EnvironmentSystem } from '../systems/EnvironmentSystem';
 import { CollisionHandler } from '../systems/CollisionHandler';
+import { JuiceSystem } from '../systems/JuiceSystem';
 import { EVENTS } from '../types';
 
 const TILE_SIZE = 48;
@@ -22,6 +24,7 @@ export class GameScene extends Phaser.Scene {
   private comboSystem!: ComboSystem;
   private envSystem!: EnvironmentSystem;
   private collisionHandler!: CollisionHandler;
+  private juiceSystem!: JuiceSystem;
 
   constructor() { super({ key: 'Game' }); }
 
@@ -64,10 +67,12 @@ export class GameScene extends Phaser.Scene {
       this.envSystem
     );
     this.collisionHandler.wire();
+    this.juiceSystem = new JuiceSystem(this);
 
     // Events
-    this.events.on(EVENTS.ENEMY_KILLED, () => {
+    this.events.on(EVENTS.ENEMY_KILLED, (enemy: Enemy) => {
       this.comboSystem.registerKill();
+      this.juiceSystem.spawnKillParticles(enemy.x, enemy.y, 0xff6600);
     });
     this.comboSystem.on('combo-update', (mult: number) => {
       this.events.emit(EVENTS.COMBO_UPDATE, mult);
