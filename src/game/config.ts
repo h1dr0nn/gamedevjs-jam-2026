@@ -4,6 +4,7 @@ import { PreloadScene } from './scenes/PreloadScene';
 import { MenuScene } from './scenes/MenuScene';
 import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
+import { UpgradeScene } from './scenes/UpgradeScene';
 
 export function createGame(parent: HTMLElement): Phaser.Game {
   const config: Phaser.Types.Core.GameConfig = {
@@ -19,7 +20,7 @@ export function createGame(parent: HTMLElement): Phaser.Game {
         debug: import.meta.env.DEV,
       },
     },
-    scene: [BootScene, PreloadScene, MenuScene, GameScene, UIScene],
+    scene: [BootScene, PreloadScene, MenuScene, GameScene, UIScene, UpgradeScene],
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,

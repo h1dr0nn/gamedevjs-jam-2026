@@ -2,6 +2,9 @@ import Phaser from 'phaser';
 import { Player } from '../entities/Player';
 import { Enemy } from '../entities/enemies/Enemy';
 import { Grunt } from '../entities/enemies/Grunt';
+import { Shielder } from '../entities/enemies/Shielder';
+import { Bomber } from '../entities/enemies/Bomber';
+import { Turret } from '../entities/enemies/Turret';
 import { Barrel } from '../entities/environment/Barrel';
 import { Boulder } from '../entities/environment/Boulder';
 import { CrackedWall } from '../entities/environment/CrackedWall';
@@ -9,7 +12,10 @@ import { ComboSystem } from '../systems/ComboSystem';
 import { EnvironmentSystem } from '../systems/EnvironmentSystem';
 import { CollisionHandler } from '../systems/CollisionHandler';
 import { JuiceSystem } from '../systems/JuiceSystem';
-import { EVENTS } from '../types';
+import { UpgradeSystem } from '../systems/UpgradeSystem';
+import { RoomGenerator } from '../systems/RoomGenerator';
+import { ALL_UPGRADES } from '../data/upgrades';
+import { EVENTS, RoomConfig, RoomType, EnemyType, PlayerStats } from '../types';
 
 const TILE_SIZE = 48;
 const COLS = 16;
@@ -25,6 +31,11 @@ export class GameScene extends Phaser.Scene {
   private envSystem!: EnvironmentSystem;
   private collisionHandler!: CollisionHandler;
   private juiceSystem!: JuiceSystem;
+  private upgradeSystem!: UpgradeSystem;
+  private currentFloor = 1;
+  private roomsCleared = 0;
+  private roomCleared = false;
+  private roomGen!: RoomGenerator;
 
   constructor() { super({ key: 'Game' }); }
 
@@ -69,10 +80,14 @@ export class GameScene extends Phaser.Scene {
     this.collisionHandler.wire();
     this.juiceSystem = new JuiceSystem(this);
 
+    this.upgradeSystem = new UpgradeSystem(ALL_UPGRADES);
+    this.roomGen = new RoomGenerator(this.currentFloor);
+
     // Events
     this.events.on(EVENTS.ENEMY_KILLED, (enemy: Enemy) => {
       this.comboSystem.registerKill();
       this.juiceSystem.spawnKillParticles(enemy.x, enemy.y, 0xff6600);
+      this.checkRoomClear();
     });
     this.comboSystem.on('combo-update', (mult: number) => {
       this.events.emit(EVENTS.COMBO_UPDATE, mult);
@@ -128,6 +143,85 @@ export class GameScene extends Phaser.Scene {
       if (enemy.isDead && enemy.active) {
         (e as Phaser.GameObjects.GameObject).destroy();
       }
+    });
+  }
+
+  private checkRoomClear(): void {
+    if (this.roomCleared) return;
+    const alive = this.enemies.getChildren().filter(e => {
+      const enemy = e as Enemy;
+      return enemy.active && !enemy.isDead;
+    });
+    if (alive.length === 0) {
+      this.roomCleared = true;
+      this.roomsCleared++;
+      this.events.emit(EVENTS.ROOM_CLEARED);
+      this.time.delayedCall(800, () => this.showUpgradeScreen());
+    }
+  }
+
+  private showUpgradeScreen(): void {
+    this.scene.pause();
+    this.scene.launch('Upgrade', {
+      stats: this.player.stats,
+      upgradeSystem: this.upgradeSystem,
+      onChosen: (newStats: PlayerStats) => {
+        this.player.applyStats(newStats);
+        this.envSystem.updateStats(newStats);
+        this.scene.resume();
+        this.loadNextRoom();
+      },
+    });
+  }
+
+  private loadNextRoom(): void {
+    this.roomCleared = false;
+    if (this.roomsCleared % 5 === 0) this.currentFloor++;
+    this.events.emit('floor-update', this.currentFloor);
+    this.roomGen = new RoomGenerator(this.currentFloor);
+
+    this.enemies.clear(true, true);
+    this.barrels.clear(true, true);
+    this.boulders.clear(true, true);
+    this.crackedWalls.clear(true, true);
+
+    const config = this.roomGen.generate(RoomType.Combat);
+    this.spawnRoomFromConfig(config);
+  }
+
+  private spawnRoomFromConfig(config: RoomConfig): void {
+    const TILE_SIZE_LOCAL = 48;
+    config.enemySpawns.forEach(spawn => {
+      const px = (spawn.col + 0.5) * TILE_SIZE_LOCAL;
+      const py = (spawn.row + 0.5) * TILE_SIZE_LOCAL;
+      let enemy: Enemy;
+      switch (spawn.type) {
+        case EnemyType.Shielder: {
+          const s = new Shielder(this, px, py);
+          s.setTarget(this.player);
+          enemy = s;
+          break;
+        }
+        case EnemyType.Bomber: {
+          const b = new Bomber(this, px, py);
+          b.setTarget(this.player);
+          enemy = b;
+          break;
+        }
+        case EnemyType.Turret: {
+          const t = new Turret(this, px, py);
+          t.setTarget(this.player);
+          enemy = t;
+          break;
+        }
+        default: {
+          const g = new Grunt(this, px, py);
+          g.setTarget(this.player);
+          enemy = g;
+          break;
+        }
+      }
+      this.enemies.add(enemy);
     });
   }
 
