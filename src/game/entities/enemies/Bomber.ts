@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Enemy } from './Enemy';
 import { EnemyType, EVENTS } from '../../types';
+import { TILES } from '../../utils/TileResolver';
 
 export class Bomber extends Enemy {
   readonly type = EnemyType.Bomber;
@@ -11,7 +12,7 @@ export class Bomber extends Enemy {
   private readonly TRIGGER_RANGE = 40;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 1, 'bomber');
+    super(scene, x, y, 1, TILES.bomber.sheet, TILES.bomber.frame);
     this.setDisplaySize(20, 20);
     (this.body as Phaser.Physics.Arcade.Body).setSize(20, 20);
   }

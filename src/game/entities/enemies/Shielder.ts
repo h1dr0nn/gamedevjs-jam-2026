@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Enemy } from './Enemy';
 import { EnemyType } from '../../types';
+import { TILES } from '../../utils/TileResolver';
 
 export class Shielder extends Enemy {
   readonly type = EnemyType.Shielder;
@@ -8,7 +9,7 @@ export class Shielder extends Enemy {
   faceAngle = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 3, 'shielder');
+    super(scene, x, y, 3, TILES.shielder.sheet, TILES.shielder.frame);
     this.setDisplaySize(22, 22);
     (this.body as Phaser.Physics.Arcade.Body).setSize(22, 22);
   }

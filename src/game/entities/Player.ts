@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { PlayerStats, DEFAULT_PLAYER_STATS, EVENTS } from '../types';
 import { DashSystem } from '../systems/DashSystem';
+import { TILES } from '../utils/TileResolver';
 
 const STILL_TIMEOUT = 2000;
 
@@ -22,7 +23,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private afterimages: Phaser.GameObjects.Image[] = [];
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 'player');
+    super(scene, x, y, TILES.player.sheet, TILES.player.frame);
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
@@ -62,7 +63,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   private spawnAfterimage(): void {
-    const ghost = this.scene.add.image(this.x, this.y, 'player');
+    const ghost = this.scene.add.image(this.x, this.y, TILES.player.sheet, TILES.player.frame);
     ghost.setDisplaySize(24, 24);
     ghost.setAlpha(0.5);
     ghost.setTint(0x00ffff);
@@ -110,11 +111,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (!this.dashSystem.isDashing) {
       const SPEED = 160;
       let vx = 0, vy = 0;
-      if (this.cursors.left.isDown || this.wasd.left.isDown) vx = -SPEED;
-      else if (this.cursors.right.isDown || this.wasd.right.isDown) vx = SPEED;
-      if (this.cursors.up.isDown || this.wasd.up.isDown) vy = -SPEED;
-      else if (this.cursors.down.isDown || this.wasd.down.isDown) vy = SPEED;
-      body.setVelocity(vx, vy);
+      if (this.cursors.left.isDown || this.wasd.left.isDown) vx = -1;
+      else if (this.cursors.right.isDown || this.wasd.right.isDown) vx = 1;
+      if (this.cursors.up.isDown || this.wasd.up.isDown) vy = -1;
+      else if (this.cursors.down.isDown || this.wasd.down.isDown) vy = 1;
+      const len = Math.sqrt(vx * vx + vy * vy) || 1;
+      body.setVelocity((vx / len) * SPEED, (vy / len) * SPEED);
 
       if (vx === 0 && vy === 0) {
         this.stillTimer += delta;

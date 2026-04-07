@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Enemy } from './Enemy';
 import { EnemyType } from '../../types';
+import { TILES } from '../../utils/TileResolver';
 
 export class Grunt extends Enemy {
   readonly type = EnemyType.Grunt;
@@ -8,7 +9,7 @@ export class Grunt extends Enemy {
   private readonly SPEED = 80;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 2, 'grunt');
+    super(scene, x, y, 2, TILES.grunt.sheet, TILES.grunt.frame);
     this.setDisplaySize(20, 20);
     (this.body as Phaser.Physics.Arcade.Body).setSize(20, 20);
   }
