@@ -15,7 +15,7 @@ import { JuiceSystem } from '../systems/JuiceSystem';
 import { UpgradeSystem } from '../systems/UpgradeSystem';
 import { RoomGenerator } from '../systems/RoomGenerator';
 import { ALL_UPGRADES } from '../data/upgrades';
-import { EVENTS, RoomConfig, RoomType, EnemyType, PlayerStats } from '../types';
+import { EVENTS, RoomConfig, RoomType, EnemyType, EnvObjectType, PlayerStats } from '../types';
 
 const TILE_SIZE = 48;
 const COLS = 16;
@@ -45,12 +45,6 @@ export class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, W, H);
     this.cameras.main.setBounds(0, 0, W, H);
 
-    // Floor
-    this.add.rectangle(W / 2, H / 2, W, H, 0x1a1a2e);
-
-    // Border walls (visual only — world bounds handle physics)
-    this.drawBorderWalls(W, H);
-
     // Groups
     this.enemies = this.add.group();
     this.barrels = this.add.group();
@@ -60,9 +54,6 @@ export class GameScene extends Phaser.Scene {
     // Player
     this.player = new Player(this, W / 2, H / 2);
     this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-
-    // Spawn test room
-    this.spawnTestRoom(W, H);
 
     // Systems
     this.comboSystem = new ComboSystem({
@@ -83,6 +74,11 @@ export class GameScene extends Phaser.Scene {
     this.upgradeSystem = new UpgradeSystem(ALL_UPGRADES);
     this.roomGen = new RoomGenerator(this.currentFloor);
 
+    // Spawn first room
+    const firstRoom = this.roomGen.generate(RoomType.Combat);
+    this.buildRoomVisuals(firstRoom);
+    this.spawnRoomFromConfig(firstRoom);
+
     // Events
     this.events.on(EVENTS.ENEMY_KILLED, (enemy: Enemy) => {
       this.comboSystem.registerKill();
@@ -99,39 +95,6 @@ export class GameScene extends Phaser.Scene {
 
     // Launch UI overlay
     this.scene.launch('UI', { gameScene: this });
-  }
-
-  private drawBorderWalls(W: number, H: number): void {
-    const color = 0x334455;
-    this.add.rectangle(W / 2, TILE_SIZE / 2, W, TILE_SIZE, color);
-    this.add.rectangle(W / 2, H - TILE_SIZE / 2, W, TILE_SIZE, color);
-    this.add.rectangle(TILE_SIZE / 2, H / 2, TILE_SIZE, H, color);
-    this.add.rectangle(W - TILE_SIZE / 2, H / 2, TILE_SIZE, H, color);
-  }
-
-  private spawnTestRoom(W: number, H: number): void {
-    const grunt1 = new Grunt(this, 150, 150);
-    grunt1.setTarget(this.player);
-    this.enemies.add(grunt1);
-
-    const grunt2 = new Grunt(this, W - 150, H - 150);
-    grunt2.setTarget(this.player);
-    this.enemies.add(grunt2);
-
-    const grunt3 = new Grunt(this, W - 150, 150);
-    grunt3.setTarget(this.player);
-    this.enemies.add(grunt3);
-
-    const barrel1 = new Barrel(this, 200, H / 2);
-    this.barrels.add(barrel1);
-    const barrel2 = new Barrel(this, 260, H / 2);
-    this.barrels.add(barrel2);
-
-    const boulder = new Boulder(this, W / 2, 150);
-    this.boulders.add(boulder);
-
-    const wall = new CrackedWall(this, W / 2 + 100, H / 2);
-    this.crackedWalls.add(wall);
   }
 
   update(_time: number, _delta: number): void {
@@ -186,6 +149,7 @@ export class GameScene extends Phaser.Scene {
     this.crackedWalls.clear(true, true);
 
     const config = this.roomGen.generate(RoomType.Combat);
+    this.buildRoomVisuals(config);
     this.spawnRoomFromConfig(config);
   }
 
@@ -222,6 +186,53 @@ export class GameScene extends Phaser.Scene {
         }
       }
       this.enemies.add(enemy);
+    });
+  }
+
+  private buildRoomVisuals(config: RoomConfig): void {
+    const COLS_LOCAL = 16;
+    const ROWS_LOCAL = 12;
+    const TILE = 48;
+    const W = COLS_LOCAL * TILE;
+    const H = ROWS_LOCAL * TILE;
+    const wallColor = 0x334455;
+    const floorColor = 0x1a1a2e;
+
+    // Floor base
+    this.add.rectangle(W / 2, H / 2, W, H, floorColor);
+
+    config.grid.forEach((row, r) => {
+      row.forEach((cell, c) => {
+        const cx = (c + 0.5) * TILE;
+        const cy = (r + 0.5) * TILE;
+
+        if (cell.wall) {
+          this.add.rectangle(cx, cy, TILE, TILE, wallColor);
+          return;
+        }
+
+        if (cell.envObject) {
+          switch (cell.envObject) {
+            case EnvObjectType.Barrel: {
+              const b = new Barrel(this, cx, cy);
+              this.barrels.add(b);
+              break;
+            }
+            case EnvObjectType.Boulder: {
+              const bo = new Boulder(this, cx, cy);
+              this.boulders.add(bo);
+              break;
+            }
+            case EnvObjectType.CrackedWall: {
+              const cw = new CrackedWall(this, cx, cy);
+              this.crackedWalls.add(cw);
+              break;
+            }
+            default:
+              break;
+          }
+        }
+      });
     });
   }
 
