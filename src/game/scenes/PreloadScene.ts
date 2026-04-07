@@ -1,30 +1,23 @@
 import Phaser from 'phaser';
 
 export class PreloadScene extends Phaser.Scene {
-  constructor() {
-    super({ key: 'Preload' });
-  }
+  constructor() { super({ key: 'Preload' }); }
 
-  preload() {
-    // Show loading bar
+  preload(): void {
     const { width, height } = this.scale;
-    const bar = this.add.rectangle(width / 2, height / 2, 0, 20, 0x00ff99);
-    const border = this.add.rectangle(width / 2, height / 2, 304, 24).setStrokeStyle(2, 0xffffff);
 
-    this.load.on('progress', (value: number) => {
-      bar.width = 300 * value;
-    });
+    this.add.rectangle(width / 2, height / 2, width, height, 0x0a0a1a);
 
-    // TODO: Load game assets here
-    // this.load.image('player', 'assets/player.png');
-    // this.load.tilemapTiledJSON('map', 'assets/map.json');
-    // this.load.audio('bgm', 'assets/audio/bgm.mp3');
+    const bar = this.add.rectangle(width / 2, height / 2, 0, 8, 0x00ff99);
+    this.add.rectangle(width / 2, height / 2, 304, 12).setStrokeStyle(1, 0x334455);
 
-    // Suppress unused variable warning in production
-    void border;
+    this.add.text(width / 2, height / 2 - 30, 'CRASH', {
+      fontSize: '32px', color: '#00ffff', fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    this.load.on('progress', (v: number) => { bar.width = 300 * v; });
+    // All visuals are procedural — no external assets to load.
   }
 
-  create() {
-    this.scene.start('Menu');
-  }
+  create(): void { this.scene.start('Menu'); }
 }
