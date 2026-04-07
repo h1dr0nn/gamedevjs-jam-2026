@@ -11,11 +11,9 @@ export class Bomber extends Enemy {
   private readonly TRIGGER_RANGE = 40;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 1);
-  }
-
-  protected createGraphics(): void {
-    this.gfx = this.scene.add.rectangle(this.x, this.y, 20, 20, 0xff0066);
+    super(scene, x, y, 1, 'bomber');
+    this.setDisplaySize(20, 20);
+    (this.body as Phaser.Physics.Arcade.Body).setSize(20, 20);
   }
 
   setTarget(target: { x: number; y: number }): void {
@@ -34,12 +32,12 @@ export class Bomber extends Enemy {
       if (dist <= this.TRIGGER_RANGE) {
         this.detonating = true;
         body.setVelocity(0, 0);
-        this.gfx.setFillStyle(0xffffff);
+        this.setTint(0xffffff);
       }
     } else {
       this.fuseTimer += delta;
       const blink = Math.floor(this.fuseTimer / 150) % 2 === 0;
-      this.gfx.setFillStyle(blink ? 0xffffff : 0xff0066);
+      this.setTint(blink ? 0xffffff : 0xff0066);
       if (this.fuseTimer >= this.FUSE_TIME) {
         this.scene.events.emit(EVENTS.EXPLOSION, { x: this.x, y: this.y, radius: 60 });
         this.hp = 0;

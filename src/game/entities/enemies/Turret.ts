@@ -10,11 +10,9 @@ export class Turret extends Enemy {
   bullets: Phaser.GameObjects.Arc[] = [];
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 4);
-  }
-
-  protected createGraphics(): void {
-    this.gfx = this.scene.add.rectangle(this.x, this.y, 22, 22, 0xaa00aa);
+    super(scene, x, y, 4, 'turret');
+    this.setDisplaySize(24, 24);
+    (this.body as Phaser.Physics.Arcade.Body).setSize(24, 24);
   }
 
   setTarget(target: { x: number; y: number }): void {

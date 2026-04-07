@@ -8,11 +8,9 @@ export class Grunt extends Enemy {
   private readonly SPEED = 80;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 2);
-  }
-
-  protected createGraphics(): void {
-    this.gfx = this.scene.add.rectangle(this.x, this.y, 18, 18, 0xff6600);
+    super(scene, x, y, 2, 'grunt');
+    this.setDisplaySize(20, 20);
+    (this.body as Phaser.Physics.Arcade.Body).setSize(20, 20);
   }
 
   setTarget(target: { x: number; y: number }): void {

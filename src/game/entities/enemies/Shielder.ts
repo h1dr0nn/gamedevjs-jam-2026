@@ -8,11 +8,9 @@ export class Shielder extends Enemy {
   faceAngle = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 3);
-  }
-
-  protected createGraphics(): void {
-    this.gfx = this.scene.add.rectangle(this.x, this.y, 18, 18, 0x0044ff);
+    super(scene, x, y, 3, 'shielder');
+    this.setDisplaySize(22, 22);
+    (this.body as Phaser.Physics.Arcade.Body).setSize(22, 22);
   }
 
   setTarget(target: { x: number; y: number }): void {

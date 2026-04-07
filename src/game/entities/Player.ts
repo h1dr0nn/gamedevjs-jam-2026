@@ -19,19 +19,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   };
   private stillTimer = 0;
   isVulnerable = false;
-  private afterimages: Phaser.GameObjects.Rectangle[] = [];
-  private gfx!: Phaser.GameObjects.Rectangle;
+  private afterimages: Phaser.GameObjects.Image[] = [];
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, '');
+    super(scene, x, y, 'player');
     scene.add.existing(this);
     scene.physics.add.existing(this);
+
+    this.setDisplaySize(24, 24);
+    this.postFX?.addGlow(0x00ffff, 4, 0, false, 0.1, 16);
 
     this.stats = { ...DEFAULT_PLAYER_STATS };
     this.hp = this.stats.maxHp;
     this.dashSystem = new DashSystem(scene, this.stats);
-
-    this.gfx = scene.add.rectangle(x, y, 20, 20, 0x00ffff);
 
     const body = this.body as Phaser.Physics.Arcade.Body;
     body.setCollideWorldBounds(true);
@@ -62,13 +62,16 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   private spawnAfterimage(): void {
-    const ghost = this.scene.add.rectangle(this.x, this.y, 20, 20, 0x00ffff, 0.5);
+    const ghost = this.scene.add.image(this.x, this.y, 'player');
+    ghost.setDisplaySize(24, 24);
+    ghost.setAlpha(0.5);
+    ghost.setTint(0x00ffff);
     this.afterimages.push(ghost);
     this.scene.tweens.add({
       targets: ghost,
       alpha: 0,
-      scaleX: 1.5,
-      scaleY: 1.5,
+      scaleX: ghost.scaleX * 1.5,
+      scaleY: ghost.scaleY * 1.5,
       duration: 200,
       onComplete: () => {
         ghost.destroy();
@@ -122,13 +125,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
-    this.gfx.x = this.x;
-    this.gfx.y = this.y;
-    this.gfx.setFillStyle(this.isVulnerable ? 0xff4444 : 0x00ffff);
+    if (this.isVulnerable) {
+      this.setTint(0xff4444);
+    } else {
+      this.clearTint();
+    }
   }
 
   destroy(fromScene?: boolean): void {
-    this.gfx?.destroy();
     this.afterimages.forEach(a => a.destroy());
     super.destroy(fromScene);
   }

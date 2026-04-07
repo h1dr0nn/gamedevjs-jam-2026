@@ -17,7 +17,7 @@ import { RoomGenerator } from '../systems/RoomGenerator';
 import { ALL_UPGRADES } from '../data/upgrades';
 import { EVENTS, RoomConfig, RoomType, EnemyType, EnvObjectType, PlayerStats } from '../types';
 
-const TILE_SIZE = 48;
+const TILE_SIZE = 50;
 const COLS = 16;
 const ROWS = 12;
 
@@ -27,6 +27,8 @@ export class GameScene extends Phaser.Scene {
   private barrels!: Phaser.GameObjects.Group;
   private boulders!: Phaser.GameObjects.Group;
   private crackedWalls!: Phaser.GameObjects.Group;
+  private walls!: Phaser.Physics.Arcade.StaticGroup;
+  private crosshair!: Phaser.GameObjects.Arc;
   private comboSystem!: ComboSystem;
   private envSystem!: EnvironmentSystem;
   private collisionHandler!: CollisionHandler;
@@ -43,17 +45,36 @@ export class GameScene extends Phaser.Scene {
     const W = COLS * TILE_SIZE;
     const H = ROWS * TILE_SIZE;
     this.physics.world.setBounds(0, 0, W, H);
-    this.cameras.main.setBounds(0, 0, W, H);
 
     // Groups
     this.enemies = this.add.group();
     this.barrels = this.add.group();
     this.boulders = this.add.group();
     this.crackedWalls = this.add.group();
+    this.walls = this.physics.add.staticGroup();
+
+    // Atmosphere
+    const cam = this.cameras.main;
+    cam.postFX?.addVignette(0.5, 0.5, 0.35, 0.4);
+    cam.postFX?.addBloom(0xffffff, 1, 1, 1, 0.8);
 
     // Player
     this.player = new Player(this, W / 2, H / 2);
-    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+
+    // Wall collisions
+    this.physics.add.collider(this.player, this.walls);
+    this.physics.add.collider(this.enemies, this.walls);
+
+    // Custom crosshair cursor
+    this.input.setDefaultCursor('none');
+    this.crosshair = this.add.circle(0, 0, 8, 0x00ff99, 0).setStrokeStyle(2, 0x00ff99).setDepth(200);
+    const innerDot = this.add.circle(0, 0, 2, 0x00ff99).setDepth(200);
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      this.crosshair.x = pointer.worldX;
+      this.crosshair.y = pointer.worldY;
+      innerDot.x = pointer.worldX;
+      innerDot.y = pointer.worldY;
+    });
 
     // Systems
     this.comboSystem = new ComboSystem({
@@ -154,7 +175,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private spawnRoomFromConfig(config: RoomConfig): void {
-    const TILE_SIZE_LOCAL = 48;
+    const TILE_SIZE_LOCAL = TILE_SIZE;
     config.enemySpawns.forEach(spawn => {
       const px = (spawn.col + 0.5) * TILE_SIZE_LOCAL;
       const py = (spawn.row + 0.5) * TILE_SIZE_LOCAL;
@@ -189,25 +210,41 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  private buildRoomVisuals(config: RoomConfig): void {
-    const COLS_LOCAL = 16;
-    const ROWS_LOCAL = 12;
-    const TILE = 48;
-    const W = COLS_LOCAL * TILE;
-    const H = ROWS_LOCAL * TILE;
-    const wallColor = 0x334455;
-    const floorColor = 0x1a1a2e;
+  private roomVisuals: Phaser.GameObjects.GameObject[] = [];
 
-    // Floor base
-    this.add.rectangle(W / 2, H / 2, W, H, floorColor);
+  private buildRoomVisuals(config: RoomConfig): void {
+    // Clear old visuals
+    this.roomVisuals.forEach(v => v.destroy());
+    this.roomVisuals = [];
+    this.walls.clear(true, true);
+
+    const W = COLS * TILE_SIZE;
+    const H = ROWS * TILE_SIZE;
+
+    // Floor base — tiled sprite
+    const floor = this.add.tileSprite(W / 2, H / 2, W, H, 'floor');
+    this.roomVisuals.push(floor);
+
+    // Scatter floor dust particles for texture
+    for (let i = 0; i < 20; i++) {
+      const dx = Phaser.Math.Between(TILE_SIZE, W - TILE_SIZE);
+      const dy = Phaser.Math.Between(TILE_SIZE, H - TILE_SIZE);
+      const dot = this.add.circle(dx, dy, Phaser.Math.Between(1, 2), 0x222244, 0.3);
+      this.roomVisuals.push(dot);
+    }
 
     config.grid.forEach((row, r) => {
       row.forEach((cell, c) => {
-        const cx = (c + 0.5) * TILE;
-        const cy = (r + 0.5) * TILE;
+        const cx = (c + 0.5) * TILE_SIZE;
+        const cy = (r + 0.5) * TILE_SIZE;
 
         if (cell.wall) {
-          this.add.rectangle(cx, cy, TILE, TILE, wallColor);
+          // Visual
+          const wallImg = this.add.image(cx, cy, 'wall');
+          this.roomVisuals.push(wallImg);
+          // Physics — static body for collision
+          const wallBody = this.add.rectangle(cx, cy, TILE_SIZE, TILE_SIZE) as unknown as Phaser.Physics.Arcade.Sprite;
+          this.walls.add(wallBody);
           return;
         }
 
