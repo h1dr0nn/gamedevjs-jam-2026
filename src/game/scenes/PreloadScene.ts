@@ -17,15 +17,7 @@ export class PreloadScene extends Phaser.Scene {
 
     this.load.on('progress', (v: number) => { bar.width = 300 * v; });
 
-    // Load Kenney spritesheets
-    this.load.spritesheet('rpg-sheet', 'assets/roguelike-rpg/Spritesheet/roguelikeSheet_transparent.png', {
-      frameWidth: 16, frameHeight: 16, margin: 1, spacing: 1,
-    });
-    this.load.spritesheet('dungeon-sheet', 'assets/dungeons/Spritesheet/roguelikeDungeon_transparent.png', {
-      frameWidth: 16, frameHeight: 16, margin: 1, spacing: 1,
-    });
-
-    // Generate all procedural textures (fallback)
+    // Generate procedural textures
     this.generateTextures();
   }
 

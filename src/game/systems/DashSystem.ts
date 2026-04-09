@@ -9,6 +9,8 @@ export class DashSystem {
 
   private cooldownTimer = 0;
   private dashEndTimer = 0;
+  private dashStartX = 0;
+  private dashStartY = 0;
   private readonly DASH_DURATION = 120; // ms
 
   constructor(_scene: Phaser.Scene, private stats: PlayerStats) {
@@ -37,14 +39,25 @@ export class DashSystem {
     this.state = 'dashing';
     this.chargesLeft--;
     this.dashEndTimer = this.DASH_DURATION;
+    this.dashStartX = fromX;
+    this.dashStartY = fromY;
 
     return true;
   }
 
   update(delta: number, body: Phaser.Physics.Arcade.Body): void {
     if (this.state === 'dashing') {
-      this.dashEndTimer -= delta;
-      if (this.dashEndTimer <= 0) {
+      // Cap delta to prevent frame-spike teleportation
+      const dt = Math.min(delta, 50);
+      this.dashEndTimer -= dt;
+
+      // Also stop if player has already traveled max distance
+      const traveled = Phaser.Math.Distance.Between(
+        this.dashStartX, this.dashStartY,
+        body.center.x, body.center.y
+      );
+
+      if (this.dashEndTimer <= 0 || traveled >= this.stats.dashDistance) {
         body.setVelocity(0, 0);
         this.state = 'cooldown';
         this.cooldownTimer = this.stats.dashCooldown;

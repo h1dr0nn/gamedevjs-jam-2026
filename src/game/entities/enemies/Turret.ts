@@ -1,8 +1,6 @@
 import Phaser from 'phaser';
 import { Enemy } from './Enemy';
 import { EnemyType } from '../../types';
-import { TILES } from '../../utils/TileResolver';
-
 export class Turret extends Enemy {
   readonly type = EnemyType.Turret;
   private target: { x: number; y: number } | null = null;
@@ -11,7 +9,7 @@ export class Turret extends Enemy {
   bullets: Phaser.GameObjects.Arc[] = [];
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 4, TILES.turret.sheet, TILES.turret.frame);
+    super(scene, x, y, 4, 'turret');
     this.setDisplaySize(24, 24);
     (this.body as Phaser.Physics.Arcade.Body).setSize(24, 24);
   }

@@ -13,7 +13,7 @@ import { JuiceSystem } from '../systems/JuiceSystem';
 import { UpgradeSystem } from '../systems/UpgradeSystem';
 import { ALL_UPGRADES } from '../data/upgrades';
 import { EVENTS, EnemyType, PlayerStats } from '../types';
-import { TILES } from '../utils/TileResolver';
+
 
 const TILE_SIZE = 50;
 const COLS = 40;
@@ -333,14 +333,7 @@ export class GameScene extends Phaser.Scene {
 
   // ─── Arena ─────────────────────────────────────────────────────────────
   private buildArena(): void {
-    // Build a tileable floor texture from the dungeon spritesheet frame
-    if (!this.textures.exists('floor-tile')) {
-      const floorFrame = this.textures.getFrame(TILES.floor.sheet, TILES.floor.frame);
-      const rt = this.make.renderTexture({ width: 16, height: 16 }, false);
-      rt.draw(floorFrame, 0, 0);
-      rt.saveTexture('floor-tile');
-    }
-    const floor = this.add.tileSprite(W / 2, H / 2, W, H, 'floor-tile');
+    const floor = this.add.tileSprite(W / 2, H / 2, W, H, 'floor');
     this.arenaVisuals.push(floor);
 
     for (let i = 0; i < 30; i++) {
@@ -355,7 +348,7 @@ export class GameScene extends Phaser.Scene {
         const cx = (c + 0.5) * TILE_SIZE;
         const cy = (r + 0.5) * TILE_SIZE;
         this.arenaVisuals.push(
-          this.add.image(cx, cy, TILES.wall.sheet, TILES.wall.frame).setDisplaySize(TILE_SIZE, TILE_SIZE)
+          this.add.image(cx, cy, 'wall').setDisplaySize(TILE_SIZE, TILE_SIZE)
         );
         this.walls.add(this.add.rectangle(cx, cy, TILE_SIZE, TILE_SIZE) as unknown as Phaser.Physics.Arcade.Sprite);
       }
@@ -372,7 +365,7 @@ export class GameScene extends Phaser.Scene {
       const cx = (c + 0.5) * TILE_SIZE;
       const cy = (r + 0.5) * TILE_SIZE;
       this.arenaVisuals.push(
-        this.add.image(cx, cy, TILES.wall.sheet, TILES.wall.frame).setDisplaySize(TILE_SIZE, TILE_SIZE)
+        this.add.image(cx, cy, 'wall').setDisplaySize(TILE_SIZE, TILE_SIZE)
       );
       this.walls.add(this.add.rectangle(cx, cy, TILE_SIZE, TILE_SIZE) as unknown as Phaser.Physics.Arcade.Sprite);
     });

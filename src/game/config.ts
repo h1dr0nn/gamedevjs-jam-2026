@@ -9,8 +9,6 @@ import { UpgradeScene } from './scenes/UpgradeScene';
 export function createGame(parent: HTMLElement): Phaser.Game {
   const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
     parent,
     backgroundColor: '#1a1a2e',
     physics: {
@@ -22,8 +20,10 @@ export function createGame(parent: HTMLElement): Phaser.Game {
     },
     scene: [BootScene, PreloadScene, MenuScene, GameScene, UIScene, UpgradeScene],
     scale: {
-      mode: Phaser.Scale.FIT,
+      mode: Phaser.Scale.RESIZE,
       autoCenter: Phaser.Scale.CENTER_BOTH,
+      width: '100%',
+      height: '100%',
     },
   };
 

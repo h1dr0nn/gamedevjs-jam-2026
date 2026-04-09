@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { PlayerStats, DEFAULT_PLAYER_STATS, EVENTS } from '../types';
 import { DashSystem } from '../systems/DashSystem';
-import { TILES } from '../utils/TileResolver';
 
 const STILL_TIMEOUT = 2000;
 
@@ -23,7 +22,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private afterimages: Phaser.GameObjects.Image[] = [];
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, TILES.player.sheet, TILES.player.frame);
+    super(scene, x, y, 'player');
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
@@ -63,7 +62,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   private spawnAfterimage(): void {
-    const ghost = this.scene.add.image(this.x, this.y, TILES.player.sheet, TILES.player.frame);
+    const ghost = this.scene.add.image(this.x, this.y, 'player');
     ghost.setDisplaySize(24, 24);
     ghost.setAlpha(0.5);
     ghost.setTint(0x00ffff);

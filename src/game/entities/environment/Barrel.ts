@@ -1,11 +1,9 @@
 import Phaser from 'phaser';
-import { TILES } from '../../utils/TileResolver';
-
 export class Barrel extends Phaser.Physics.Arcade.Sprite {
   exploded = false;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, TILES.barrel.sheet, TILES.barrel.frame);
+    super(scene, x, y, 'barrel');
     scene.add.existing(this);
     scene.physics.add.existing(this, true); // static body
     this.setDisplaySize(20, 20);
