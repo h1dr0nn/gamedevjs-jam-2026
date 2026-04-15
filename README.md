@@ -22,8 +22,8 @@ src/
         ├── BootScene.ts    # Initial boot
         ├── PreloadScene.ts # Asset loading + progress bar
         ├── MenuScene.ts    # Main menu
-        ├── GameScene.ts    # Core gameplay
-        └── UIScene.ts      # HUD overlay (score, etc.)
+        ├── GameScene.ts    # Core gameplay (empty base)
+        └── UIScene.ts      # HUD overlay (empty base)
 ```
 
 ## Getting Started
