@@ -4,3 +4,13 @@ dist/
 *.local
 .env
 .env.*
+
+# Tooling / agent workspaces
+.claude/
+.superpowers/
+.vscode/
+.idea/
+
+# Local planning & scratch docs
+docs/
+*-plan.md
