@@ -7,6 +7,7 @@ dist/
 
 # Tooling / agent workspaces
 .claude/
+.documents/
 .superpowers/
 .vscode/
 .idea/
@@ -14,3 +15,7 @@ dist/
 # Local planning & scratch docs
 docs/
 *-plan.md
+
+# Raw asset packs (local reference only; copy used files into public/ when wiring)
+assets/
+

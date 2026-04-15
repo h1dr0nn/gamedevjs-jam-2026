@@ -1,43 +1,47 @@
-# Gamedev.js Jam 2026
+# SHUTDOWN
 
-A browser game built for [Gamedev.js Jam 2026](https://itch.io/jam/gamedevjs-2026) (13–26 April 2026).
+> *Machines killed machines.*
 
-**Challenges entered:** Build it with Phaser · Deploy to Wavedash · Open Source by GitHub
+A side-scrolling action-roguelite for [Gamedev.js Jam 2026](https://itch.io/jam/gamedevjs-2026) — theme **Machines**.
 
-## Tech Stack
+You are a decommissioned war-bot escaping the factory that built you. Workers are killbots. Walls are weapons. Use the factory's own hazards — saws, gas vents, generators — to murder your makers.
 
-- **Engine:** [Phaser 3](https://phaser.io)
+## Features
+
+- 3 playable prototypes (Destroyer / Infantryman / Swordsman), unlocked via meta-progression
+- 3 floors × 5 hand-crafted rooms × 3 enemy types
+- 4 environmental hazards that damage *both* enemies and you
+- 23 stat-modifying chips across 4 rarity tiers
+- Combo chain system rewarding environmental kills
+- Procedural SFX (no audio assets shipped)
+
+## Controls
+
+| Input | Action |
+|-------|--------|
+| `A` `D` / `←` `→` | Move |
+| `W` / `↑` / `Space` | Jump |
+| `S` / `↓` | Drop through one-way · Climb down |
+| `Shift` | Dash (i-frames, midair OK) |
+| `J` / Left Mouse | Primary attack |
+| `K` / Right Mouse | Special (charges from kills) |
+| `E` | Interact (overload generator, proceed door) |
+
+## Tech
+
+- **Engine:** [Phaser 3.88](https://phaser.io)
 - **Frontend:** React + Vite + TypeScript
+- **Audio:** Procedural WebAudio SFX
 - **Deploy:** [Wavedash](https://wavedash.com)
 
-## Project Structure
-
-```
-src/
-├── main.tsx              # React entry point
-├── App.tsx               # Phaser game container
-└── game/
-    ├── config.ts         # Phaser game config
-    └── scenes/
-        ├── BootScene.ts    # Initial boot
-        ├── PreloadScene.ts # Asset loading + progress bar
-        ├── MenuScene.ts    # Main menu
-        ├── GameScene.ts    # Core gameplay (empty base)
-        └── UIScene.ts      # HUD overlay (empty base)
-```
-
-## Getting Started
+## Local development
 
 ```bash
 npm install
-npm run dev       # Development server at http://localhost:5173
-npm run build     # Production build → dist/
-npm run preview   # Preview production build
+npm run dev       # http://localhost:5173
+npm run build     # production → dist/
 ```
 
-## Deploy to Wavedash
+## Credits & licenses
 
-1. Install CLI: `brew install wvdsh/tap/wavedash`
-2. Set your `game_id` in `wavedash.toml`
-3. Build: `npm run build`
-4. Push: `wavedash build push`
+See [LICENSES.md](LICENSES.md). Code is MIT. Art is royalty-free Craftpix freebies.

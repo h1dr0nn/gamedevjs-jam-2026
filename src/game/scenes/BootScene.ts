@@ -5,11 +5,7 @@ export class BootScene extends Phaser.Scene {
     super({ key: 'Boot' });
   }
 
-  preload() {
-    // Load minimal assets needed for preload screen (progress bar, etc.)
-  }
-
-  create() {
+  create(): void {
     this.scene.start('Preload');
   }
 }

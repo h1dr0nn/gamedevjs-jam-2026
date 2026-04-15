@@ -9,6 +9,7 @@ export default function App() {
   useEffect(() => {
     if (containerRef.current && !gameRef.current) {
       gameRef.current = createGame(containerRef.current);
+      if (import.meta.env.DEV) (window as unknown as { PHASER_GAME?: Phaser.Game }).PHASER_GAME = gameRef.current;
     }
 
     return () => {
